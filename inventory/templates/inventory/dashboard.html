@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inventory Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f6f8;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .number {
+            font-size: 30px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        nav {
+            margin: 25px 0;
+        }
+        nav a {
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Computer Equipment Checkout System</h1>
+    <h2>Inventory Dashboard</h2>
+
+    <p>Logged in as: {{ request.user.username }}</p>
+
+    <nav>
+        <a href="{% url 'student_lookup' %}">
+            Student Lookup
+        </a>
+        <a href="{% url 'equipment_checkout' %}">
+            Equipment Checkout
+        </a>
+        <a href="{% url 'equipment_return' %}">
+            Equipment Return
+        </a>
+    </nav>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Total Equipment</h3>
+            <p class="number">{{ total_equipment }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Available</h3>
+            <p class="number">{{ available }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Checked Out</h3>
+            <p class="number">{{ checked_out }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Under Maintenance</h3>
+            <p class="number">{{ maintenance }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Active Checkouts</h3>
+            <p class="number">{{ active_checkouts }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Overdue Checkouts</h3>
+            <p class="number">{{ overdue_checkouts }}</p>
+        </div>
+    </div>
+</body>
+</html>

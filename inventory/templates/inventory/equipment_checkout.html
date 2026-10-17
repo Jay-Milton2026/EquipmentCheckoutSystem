@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Equipment Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 650px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+        input, select {
+            display: block;
+            padding: 10px;
+            margin: 10px 0 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 12px 20px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Computer Equipment Checkout System</h1>
+    <h2>Equipment Checkout</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Verify Student</button>
+    </form>
+
+    {% if message %}
+        <div class="result">
+            <p>{{ message }}</p>
+        </div>
+    {% endif %}
+
+    <p>
+        <a href="{% url 'student_lookup' %}">
+            Return to Student Lookup
+        </a>
+    </p>
+</body>
+</html>
