@@ -1,6 +1,6 @@
 
 from django import forms
-
+from django.contrib.auth import get_user_model
 
 class StudentLookupForm(forms.Form):
     student_id = forms.CharField(
@@ -41,6 +41,22 @@ class EquipmentCheckoutForm(forms.Form):
         label="Loan Duration"
     )
 
+    approving_supervisor = forms.ModelChoiceField(
+    queryset=get_user_model().objects.filter(
+        is_active=True,
+        is_staff=True,
+        groups__name="Supervisors"
+    ).distinct(),
+    required=False,
+    label="Approving Supervisor (Second Laptop Only)"
+)
+
+    supervisor_password = forms.CharField(
+        required=False,
+        label="Supervisor Password (Second Laptop Only)",
+        widget=forms.PasswordInput(render_value=False)
+    )
+
     def clean_equipment(self):
         equipment = self.cleaned_data["equipment"]
 
@@ -73,6 +89,7 @@ from .models import Checkout
 
 
 
+
 class EquipmentReturnForm(forms.Form):
     checkout = forms.ModelChoiceField(
         queryset=Checkout.objects.filter(
@@ -83,11 +100,32 @@ class EquipmentReturnForm(forms.Form):
     )
 
     inspection_passed = forms.BooleanField(
+        required=False,
+        label="All equipment returned and passed inspection"
+    )
+
+    incident_type = forms.ChoiceField(
+        choices=[
+            ("None", "No Incident"),
+            ("Missing", "Missing Equipment"),
+            ("Damaged", "Damaged Equipment"),
+        ],
         required=True,
-        label=(
-            "I confirm that all listed equipment was returned, "
-            "inspected, is functional, and is safe for reuse."
-        )
+        label="Return Condition"
+    )
+
+    affected_equipment = forms.ModelChoiceField(
+        queryset=Equipment.objects.none(),
+        required=False,
+        label="Affected Equipment"
+    )
+
+    incident_notes = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"rows": 3}
+        ),
+        required=False,
+        label="Incident Notes"
     )
 
     def __init__(self, *args, **kwargs):
@@ -96,6 +134,20 @@ class EquipmentReturnForm(forms.Form):
         self.fields["checkout"].label_from_instance = (
             self.checkout_label
         )
+
+        checkout_id = None
+
+        if self.is_bound:
+            checkout_id = self.data.get("checkout")
+        else:
+            checkout_id = self.initial.get("checkout")
+
+        if checkout_id:
+            self.fields["affected_equipment"].queryset = (
+                Equipment.objects.filter(
+                    checkoutitem__checkout_id=checkout_id
+                ).distinct()
+            )
 
     @staticmethod
     def checkout_label(checkout):
@@ -110,4 +162,26 @@ class EquipmentReturnForm(forms.Form):
             f"{checkout.student.last_name} - "
             f"Items: {asset_tags}"
         )
+
+        def clean(self):
+            cleaned_data = super().clean()
+
+        incident_type = cleaned_data.get("incident_type")
+        affected_equipment = cleaned_data.get("affected_equipment")
+        inspection_passed = cleaned_data.get("inspection_passed")
+
+        if not inspection_passed:
+            raise forms.ValidationError(
+                "Confirm that all received equipment was "
+                "inspected and its condition recorded."
+            )
+
+        if incident_type in ("Missing", "Damaged"):
+            if not affected_equipment:
+                raise forms.ValidationError(
+                    "Select the affected equipment."
+                )
+
+        return cleaned_data
+  
 

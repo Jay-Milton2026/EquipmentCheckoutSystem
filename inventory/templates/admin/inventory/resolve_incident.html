@@ -1,0 +1,37 @@
+
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h1>Resolve Equipment Incident</h1>
+
+<p><strong>Incident ID:</strong> {{ incident.id }}</p>
+<p><strong>Type:</strong> {{ incident.incident_type }}</p>
+<p><strong>Equipment:</strong> {{ incident.equipment.asset_tag }}</p>
+<p><strong>Student:</strong> {{ incident.checkout.student }}</p>
+<p><strong>Reported:</strong> {{ incident.reported_at }}</p>
+
+{% if incident.resolved %}
+    <p>This incident has already been resolved.</p>
+{% else %}
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.as_p }}
+
+        <div class="submit-row">
+            <input type="submit"
+                   value="Resolve Incident"
+                   class="default">
+        </div>
+    </form>
+{% endif %}
+
+<p>
+    <a href="{% url 'admin:inventory_equipmentincident_changelist' %}">
+        Back to Equipment Incidents
+    </a>
+</p>
+
+{% endblock %}
+  

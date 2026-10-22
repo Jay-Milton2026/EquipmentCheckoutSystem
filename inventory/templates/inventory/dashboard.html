@@ -8,37 +8,82 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 40px auto;
             padding: 20px;
             background: #f5f6f8;
+            color: #222;
         }
+
         .cards {
             display: grid;
             grid-template-columns:
                 repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
         }
+
         .card {
             background: white;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #ddd;
         }
+
         .number {
             font-size: 30px;
             font-weight: bold;
             margin: 10px 0;
         }
+
         nav {
             margin: 25px 0;
         }
+
         nav a {
             margin-right: 20px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #e8edf3;
+        }
+
+        .overdue {
+            color: #b42318;
+            font-weight: bold;
+        }
+
+        .notice {
+            background: #fff4db;
+            padding: 10px;
+            border-left: 4px solid #d79b23;
+        }
+
+        .empty-message {
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
+
     <h1>Computer Equipment Checkout System</h1>
     <h2>Inventory Dashboard</h2>
 
@@ -87,5 +132,70 @@
             <p class="number">{{ overdue_checkouts }}</p>
         </div>
     </div>
+
+    <section>
+        <h2>Overdue Equipment Details</h2>
+
+        <p>
+            Active checkouts whose due dates have passed.
+            Review outstanding items and unresolved incidents.
+        </p>
+
+        {% if overdue_details %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Checkout #</th>
+                            <th>Student</th>
+                            <th>Outstanding Equipment</th>
+                            <th>Due Date</th>
+                            <th>Hours Overdue</th>
+                            <th>Review Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detail in overdue_details %}
+                            <tr>
+                                <td>{{ detail.checkout.id }}</td>
+                                <td>{{ detail.student }}</td>
+                                <td>
+                                    {% if detail.equipment_tags %}
+                                        {{ detail.equipment_tags }}
+                                    {% else %}
+                                        None outstanding
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ detail.due_date|date:"M d, Y g:i A" }}
+                                </td>
+                                <td class="overdue">
+                                    {{ detail.hours_overdue }}
+                                </td>
+                                <td>
+                                    {% if detail.equipment_tags %}
+                                        Equipment Outstanding
+                                    {% else %}
+                                        Incident / Record Review
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="notice">
+                Checkouts with no outstanding equipment may remain
+                active because missing-equipment incidents still
+                require supervisor resolution.
+            </p>
+        {% else %}
+            <p class="empty-message">
+                No overdue active checkouts.
+            </p>
+        {% endif %}
+    </section>
+
 </body>
 </html>

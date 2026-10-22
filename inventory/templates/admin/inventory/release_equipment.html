@@ -1,0 +1,38 @@
+
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h1>Release Equipment from Maintenance</h1>
+
+<p><strong>Asset Tag:</strong> {{ equipment.asset_tag }}</p>
+<p><strong>Equipment Type:</strong> {{ equipment.equipment_type }}</p>
+<p><strong>Current Status:</strong> {{ equipment.status }}</p>
+<p><strong>Maintenance Reason:</strong> {{ equipment.maintenance_reason }}</p>
+<p><strong>Assigned Technician:</strong>
+    {{ equipment.maintenance_assigned_to|default:"Not assigned" }}
+</p>
+
+<form method="post">
+    {% csrf_token %}
+
+    {{ form.non_field_errors }}
+
+    <fieldset class="module aligned">
+        {{ form.as_p }}
+    </fieldset>
+
+    <div class="submit-row">
+        <input
+            type="submit"
+            value="Confirm Maintenance Release"
+            class="default"
+        >
+    </div>
+</form>
+
+<p>
+    <a href="{% url 'admin:inventory_equipment_changelist' %}">
+        Cancel and return to Equipment Inventory
+    </a>
+</p>
+{% endblock %}

@@ -12,25 +12,37 @@
             margin: 60px auto;
             padding: 20px;
         }
-        select {
+
+        select, textarea {
             display: block;
             padding: 10px;
             margin: 10px 0 20px;
             width: 100%;
             box-sizing: border-box;
         }
+
         button {
             padding: 12px 20px;
             cursor: pointer;
         }
+
         .result {
             margin-top: 25px;
             padding: 15px;
             background: #f0f0f0;
             border-radius: 6px;
         }
+
         .inspection {
             margin: 20px 0;
+        }
+
+        .field {
+            margin: 20px 0;
+        }
+
+        .errorlist {
+            color: #b00020;
         }
     </style>
 </head>
@@ -38,16 +50,34 @@
     <h1>Computer Equipment Checkout System</h1>
     <h2>Equipment Return</h2>
 
-    <form method="post">
+    <form method="post" id="return-form">
         {% csrf_token %}
 
         {{ form.non_field_errors }}
 
-        <p>
+        <div class="field">
             {{ form.checkout.label_tag }}
             {{ form.checkout }}
             {{ form.checkout.errors }}
-        </p>
+        </div>
+
+        <div class="field">
+            {{ form.incident_type.label_tag }}
+            {{ form.incident_type }}
+            {{ form.incident_type.errors }}
+        </div>
+
+        <div class="field">
+            {{ form.affected_equipment.label_tag }}
+            {{ form.affected_equipment }}
+            {{ form.affected_equipment.errors }}
+        </div>
+
+        <div class="field">
+            {{ form.incident_notes.label_tag }}
+            {{ form.incident_notes }}
+            {{ form.incident_notes.errors }}
+        </div>
 
         <div class="inspection">
             {{ form.inspection_passed }}
@@ -55,7 +85,7 @@
             {{ form.inspection_passed.errors }}
         </div>
 
-        <button type="submit">Complete Return</button>
+        <button type="submit">Process Return</button>
     </form>
 
     {% if message %}
@@ -69,5 +99,64 @@
             Go to Equipment Checkout
         </a>
     </p>
+
+    {{ checkout_equipment_data|json_script:"checkout-equipment-data" }}
+
+    <script>
+        const equipmentData = JSON.parse(
+            document.getElementById("checkout-equipment-data").textContent
+        );
+
+        const checkoutSelect = document.getElementById("id_checkout");
+        const incidentSelect = document.getElementById("id_incident_type");
+        const equipmentSelect = document.getElementById("id_affected_equipment");
+        const notesField = document.getElementById("id_incident_notes");
+
+        function updateEquipmentOptions() {
+            const checkoutId = checkoutSelect.value;
+            const previousValue = equipmentSelect.value;
+
+            equipmentSelect.replaceChildren(
+                new Option("Select affected equipment", "")
+            );
+
+            const items = equipmentData[checkoutId] || [];
+
+            items.forEach(function(item) {
+                equipmentSelect.add(
+                    new Option(item.label, String(item.id))
+                );
+            });
+
+            if (items.some(item => String(item.id) === previousValue)) {
+                equipmentSelect.value = previousValue;
+            }
+        }
+
+        function updateIncidentFields() {
+            const hasIncident = incidentSelect.value !== "None";
+
+            equipmentSelect.closest(".field").hidden = !hasIncident;
+            notesField.closest(".field").hidden = !hasIncident;
+
+            if (!hasIncident) {
+                equipmentSelect.value = "";
+                notesField.value = "";
+            }
+        }
+
+        checkoutSelect.addEventListener(
+            "change",
+            updateEquipmentOptions
+        );
+
+        incidentSelect.addEventListener(
+            "change",
+            updateIncidentFields
+        );
+
+        updateEquipmentOptions();
+        updateIncidentFields();
+    </script>
 </body>
 </html>
